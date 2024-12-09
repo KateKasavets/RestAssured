@@ -1,0 +1,8 @@
+<suite name="APISuite">
+    <test name="APITests">
+        <classes>
+            <class name="tests.GetAllApplicationsTest"/>
+            <class name="tests.UserRequestAdminApproveTest"/>
+        </classes>
+    </test>
+</suite>
