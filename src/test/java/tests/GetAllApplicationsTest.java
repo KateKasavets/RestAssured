@@ -1,32 +1,29 @@
 package tests;
-
-import endpoints.ЗАГСendpoints;
+import endpoints.Endpoints;
+import entities.ApplicantResponse;
 import io.restassured.response.Response;
 import org.testng.annotations.Test;
 import utilsAPI.RestAssuredSpec;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
+import java.util.List;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.notNullValue;
 
 public class GetAllApplicationsTest {
 
     @Test
-    public void test_1() throws IOException {
+    public void getAllApplicationTest(){
 
         Response response = given()
                 .spec(RestAssuredSpec.getRequestSpec())
                 .when()
-                .get(ЗАГСendpoints.APPLICATIONS);
-        response.then()
+                .get(Endpoints.GET_APPLICATIONS)
+                .then()
                 .spec(RestAssuredSpec.getResponseSpec())
-                .body("data", notNullValue());
+                .extract()
+                .response();
 
-        Files.write(Paths.get("response.json"), response.getBody().asString().getBytes());
+        ApplicantResponse applicantResponse = response.as(ApplicantResponse.class);
 
-        System.out.println("Ответ записан в файл response.json");
+        List<ApplicantResponse.Applicant> applicants = applicantResponse.getData();
+
     }
 }

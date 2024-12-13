@@ -5,6 +5,10 @@ build/
 !**/src/test/**/build/
 .idea
 response.json
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+gradlew
+src/test/resources/chromedriver.exe
 
 ### IntelliJ IDEA ###
 .idea/modules.xml

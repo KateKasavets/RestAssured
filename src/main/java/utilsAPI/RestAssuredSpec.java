@@ -1,6 +1,6 @@
 package utilsAPI;
 
-import static endpoints.ЗАГСendpoints.BASEURI;
+import static endpoints.Endpoints.BASE_URI;
 
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
@@ -13,7 +13,7 @@ import io.restassured.specification.ResponseSpecification;
 public class RestAssuredSpec {
     public static RequestSpecification getRequestSpec() {
         return new RequestSpecBuilder()
-                .setBaseUri(BASEURI)
+                .setBaseUri(BASE_URI)
                 .setContentType(ContentType.JSON)
                 .setAuth(RestAssured.basic(ConfProperties.getUserName(), ConfProperties.getPassword()))
                 .log(LogDetail.METHOD)
