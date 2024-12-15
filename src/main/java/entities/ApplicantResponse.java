@@ -1,16 +1,12 @@
 package entities;
 
 import lombok.Data;
-
 import java.util.List;
-@Data
-public class ApplicantResponse {
 
-    private List<Applicant> data;
-    private String requestId;
+public class ApplicantResponse extends BaseResponse <List<ApplicantResponse.ResponseData>> {
 
     @Data
-    public static class Applicant {
+    public static class ResponseData {
 
         private int applicationid;
         private int citizenid;

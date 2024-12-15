@@ -2,15 +2,11 @@ package entities;
 import lombok.Data;
 
 
-@Data
-public class ProcessStatusResponse {
 
-    private ResponseProcStatus data;
-
-    private String requestId;
+public class ProcessStatusResponse extends BaseResponse<ProcessStatusResponse.ResponseData> {
 
     @Data
-    public static class ResponseProcStatus {
+    public static class ResponseData {
 
         private int applicationid;
 

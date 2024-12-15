@@ -23,7 +23,7 @@ public class GetAllApplicationsTest {
 
         ApplicantResponse applicantResponse = response.as(ApplicantResponse.class);
 
-        List<ApplicantResponse.Applicant> applicants = applicantResponse.getData();
+        List<ApplicantResponse.ResponseData> applicants = applicantResponse.getData();
 
     }
 }

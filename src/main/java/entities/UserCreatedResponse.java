@@ -2,11 +2,8 @@ package entities;
 
 import lombok.Data;
 
-@Data
-public class UserCreatedResponse {
 
-    private ResponseData data;
-    private String requestId;
+public class UserCreatedResponse extends BaseResponse<UserCreatedResponse.ResponseData> {
 
     @Data
     public static class ResponseData {
