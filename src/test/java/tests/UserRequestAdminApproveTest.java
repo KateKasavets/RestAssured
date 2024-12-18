@@ -2,12 +2,10 @@ package tests;
 
 import entities.*;
 import endpoints.Endpoints;
-import io.restassured.response.Response;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import utilsAPI.RestAssuredSpec;
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 
 public class UserRequestAdminApproveTest {
 
@@ -16,7 +14,89 @@ public class UserRequestAdminApproveTest {
 
     @Test(priority = 1)
     public void sendUserRequest() {
-        UserCreatedRequest userRequest = UserCreatedRequest.builder()
+        UserCreatedRequest userRequest = createUserRequest();
+
+        UserCreatedResponse userResponse = given()
+                .spec(RestAssuredSpec.getRequestSpec())
+                .body(userRequest)
+                .when()
+                .post(Endpoints.USER_REQUEST)
+                .then()
+                .spec(RestAssuredSpec.getResponseSpec())
+                .extract()
+                .response().as(UserCreatedResponse.class);
+
+        applicationId = String.valueOf(userResponse.getData().getApplicationid());
+
+        System.out.println("ApplicationId: " + applicationId);
+
+        Assert.assertNotNull(applicationId, "ApplicationID not  null");
+    }
+
+    @Test(dependsOnMethods = "sendUserRequest")
+    public void getUserRequestStatus() {
+        ApplStatusResponse applStatusResponse = given()
+                .spec(RestAssuredSpec.getRequestSpec())
+                .pathParam("applicationId", applicationId)
+                .when()
+                .get(Endpoints.GET_APPLICATION_STATUS)
+                .then()
+                .extract()
+                .response()
+                .as(ApplStatusResponse.class);
+
+        String statusOfApplication = applStatusResponse.getData().getStatusofapplication();
+
+        System.out.println("Status of application: " + statusOfApplication);
+
+        Assert.assertEquals(statusOfApplication, "under consideration", "Status is not as expected.");
+    }
+
+    @Test(priority = 2)
+    public void sendAdminRequest() {
+        AdminCreatedRequest adminRequest = createAdminRequest();
+
+        AdminCreatedResponse responseAdminCr = given()
+                .spec(RestAssuredSpec.getRequestSpec())
+                .body(adminRequest)
+                .when()
+                .post(Endpoints.ADMIN_REQUEST)
+                .then()
+                .spec(RestAssuredSpec.getResponseSpec())
+                .extract()
+                .response().as(AdminCreatedResponse.class);
+
+        staffId = String.valueOf(responseAdminCr.getData().getStaffId());
+
+        System.out.println("StaffId: " + staffId);
+    }
+
+    @Test(dependsOnMethods = {"sendUserRequest", "sendAdminRequest"})
+    public void processRequest() {
+        Assert.assertNotNull(applicationId, "ApplicationID  not  null");
+        Assert.assertNotNull(staffId, "StaffID not null");
+
+        ProcessStatusRequest processRequest = ProcessStatusRequest.builder()
+                .applId(Integer.parseInt(applicationId))
+                .staffId(staffId)
+                .action("approved")
+                .build();
+
+        ProcessStatusResponse responseProcess = given()
+                .spec(RestAssuredSpec.getRequestSpec())
+                .body(processRequest)
+                .when()
+                .post(Endpoints.PROCESS_REQUEST)
+                .then()
+                .spec(RestAssuredSpec.getResponseSpec())
+                .extract()
+                .response().as(ProcessStatusResponse.class);
+
+        Assert.assertEquals(responseProcess.getData().getStatusofapplication(), "approved");
+    }
+
+    private UserCreatedRequest createUserRequest() {
+        return UserCreatedRequest.builder()
                 .mode("wedding")
                 .personalFirstName("Igor")
                 .personalMiddleName("Victorovich")
@@ -38,47 +118,10 @@ public class UserRequestAdminApproveTest {
                 .anotherPersonPassport("КН4532355")
                 .birthPlace("Москва")
                 .build();
-
-        Response response1 = given()
-                .spec(RestAssuredSpec.getRequestSpec())
-                .body(userRequest)
-                .when()
-                .post(Endpoints.USER_REQUEST)
-                .then()
-                .spec(RestAssuredSpec.getResponseSpec())
-                .extract()
-                .response();
-
-        UserCreatedResponse userResponse = response1.as(UserCreatedResponse.class);
-
-        applicationId = String.valueOf(userResponse.getData().getApplicationid());
-
-        System.out.println("ApplicationId: " + applicationId);
-
-        Assert.assertNotNull(applicationId, "ApplicationID not  null");
     }
 
-    @Test(dependsOnMethods = "sendUserRequest")
-    public void getUserRequestStatus() {
-        Response response = given()
-                .spec(RestAssuredSpec.getRequestSpec())
-                .pathParam("applicationId", applicationId)
-                .when()
-                .get(Endpoints.GET_APPLICATION_STATUS);
-
-        ApplStatusResponse applStatusResponse = response.as(ApplStatusResponse.class);
-
-        String statusOfApplication = applStatusResponse.getData().getStatusofapplication();
-
-        System.out.println("Status of application: " + statusOfApplication);
-
-        response.then()
-                .body("data.statusofapplication", equalTo("under consideration"));
-    }
-
-    @Test(priority = 2)
-    public void sendAdminRequest() {
-        AdminCreatedRequest adminRequest = AdminCreatedRequest.builder()
+    private AdminCreatedRequest createAdminRequest() {
+        return AdminCreatedRequest.builder()
                 .dateofbirth("12.31.2000")
                 .personalFirstName("Justin")
                 .personalLastName("Biber")
@@ -86,47 +129,5 @@ public class UserRequestAdminApproveTest {
                 .personalNumberOfPassport("КН45108998")
                 .personalPhoneNumber("375333133565")
                 .build();
-
-        Response response2 = given()
-                .spec(RestAssuredSpec.getRequestSpec())
-                .body(adminRequest)
-                .when()
-                .post(Endpoints.ADMIN_REQUEST)
-                .then()
-                .spec(RestAssuredSpec.getResponseSpec())
-                .extract()
-                .response();
-
-        AdminCreatedResponse responseAdminCr = response2.as(AdminCreatedResponse.class);
-
-        staffId = String.valueOf(responseAdminCr.getData().getStaffId());
-
-        System.out.println("StaffId: " + staffId);
-    }
-
-    @Test(dependsOnMethods = {"sendUserRequest", "sendAdminRequest"})
-    public void processRequest() {
-        Assert.assertNotNull(applicationId, "ApplicationID  not  null");
-        Assert.assertNotNull(staffId, "StaffID not null");
-
-        ProcessStatusRequest processRequest = ProcessStatusRequest.builder()
-                .applId(Integer.parseInt(applicationId))
-                .staffId(staffId)
-                .action("approved")
-                .build();
-
-        Response response = given()
-                .spec(RestAssuredSpec.getRequestSpec())
-                .body(processRequest)
-                .when()
-                .post(Endpoints.PROCESS_REQUEST)
-                .then()
-                .spec(RestAssuredSpec.getResponseSpec())
-                .extract()
-                .response();
-
-        ProcessStatusResponse responseProcess = response.getBody().as(ProcessStatusResponse.class);
-
-        Assert.assertEquals(responseProcess.getData().getStatusofapplication(), "approved");
     }
 }

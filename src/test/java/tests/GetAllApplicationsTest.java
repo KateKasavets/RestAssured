@@ -12,16 +12,14 @@ public class GetAllApplicationsTest {
     @Test
     public void getAllApplicationTest(){
 
-        Response response = given()
+        ApplicantResponse applicantResponse  = given()
                 .spec(RestAssuredSpec.getRequestSpec())
                 .when()
                 .get(Endpoints.GET_APPLICATIONS)
                 .then()
                 .spec(RestAssuredSpec.getResponseSpec())
                 .extract()
-                .response();
-
-        ApplicantResponse applicantResponse = response.as(ApplicantResponse.class);
+                .response().as(ApplicantResponse.class);
 
         List<ApplicantResponse.ResponseData> applicants = applicantResponse.getData();
 
